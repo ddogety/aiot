@@ -1,8 +1,8 @@
 from gpiozero import DigitalInputDevice  # 디지털 입력 장치를 사용하기 위한 라이브러리
-from gpiozero import OutputDevice       # 디지털 출력 장치를 사용하기 위한 라이브러리
-import time                             # 시간 지연을 위한 라이브러리
+from gpiozero import OutputDevice  # 디지털 출력 장치를 사용하기 위한 라이브러리
+import time # 시간 지연을 위한 라이브러리
 
-bz = OutputDevice(18)        # GPIO 18번 핀에 연결된 부저를 출력 장치로 설정
+bz = OutputDevice(18)  # GPIO 18번 핀에 연결된 부저를 출력 장치로 설정
 gas = DigitalInputDevice(17) # GPIO 17번 핀에 연결된 가스 센서를 입력 장치로 설정
 
 try: #에러 또는 예외가 발생했을 때 정해둔 코드로 처리해주는 역할
