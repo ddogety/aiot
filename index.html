@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko"><!--이 문서의 기본 언어가 한국어인것을 명시 -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 모바일 기기에서 화면 크기에 맞게 자동으로 레이아웃을 조정하기 위한 설정 -->
+    <meta http-equiv="refresh" content="3">    <!-- 3초마다 페이지를 자동으로 새로고침함 → 별도 클릭 없이 PIR 센서 상태가 실시간으로 갱신되어 보임 -->
+
+    <title>침입자 감지 시스템</title>
+    <style>
+        /* ===== 전체 페이지 기본 스타일 ===== */
+        body {
+            font-family: Arial, sans-serif;     /* 기본 글꼴 지정 */
+            display: flex;                      /* 자식 요소(.card)를 가운데 정렬하기 위해 flex 사용 */
+            justify-content: center;            /* 가로 방향 가운데 정렬 */
+            align-items: center;                /* 세로 방향 가운데 정렬 */
+            min-height: 100vh;                  /* 화면 전체 높이를 차지하도록 설정 */
+            margin: 0;
+            background-color: #f0f0f0;          /* 옅은 회색 배경 */
+        }
+
+        /* ===== 카드(상태 표시 박스) 스타일 ===== */
+        .card {
+            background: white;
+            border-radius: 16px;                /* 모서리를 둥글게 처리 */
+            padding: 40px;
+            width: 360px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);  /* 카드에 은은한 그림자 효과 */
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        /* ===== 상태를 나타내는 동그라미(아이콘 배경) 공통 스타일 ===== */
+        .status-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;                 /* 50%로 설정하면 정사각형이 원이 됨 */
+            margin: 0 auto 24px;                 /* 가운데 정렬 + 아래쪽 여백 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;                     /* 내부 이모지 크기 */
+        }
+
+        /* 정상 상태일 때 동그라미 색상 (초록 계열) */
+        .status-circle.normal {
+            background-color: #e8f5e9;
+            border: 4px solid #4caf50;
+        }
+
+        /* 감지 상태일 때 동그라미 색상 (빨강 계열) + 깜빡이는 애니메이션 적용 */
+        .status-circle.detected {
+            background-color: #ffebee;
+            border: 4px solid #f44336;
+            animation: pulse 1s infinite;        /* 아래에서 정의한 pulse 애니메이션을 1초 주기로 무한 반복 */
+        }
+
+        /* ===== 감지 시 동그라미가 살짝 커지고 작아지며 깜빡이는 효과 정의 ===== */
+        @keyframes pulse {
+            0%   { transform: scale(1); }        /* 시작: 원래 크기 */
+            50%  { transform: scale(1.05); }     /* 중간: 5% 확대 */
+            100% { transform: scale(1); }        /* 끝: 다시 원래 크기로 */
+        }
+
+        /* ===== 상태 텍스트("정상"/"침입자 감지!") 공통 스타일 ===== */
+        .status-text {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 24px;
+        }
+        .status-text.normal { color: #4caf50; }      /* 정상 → 초록색 글자 */
+        .status-text.detected { color: #f44336; }    /* 감지됨 → 빨간색 글자 */
+
+        /* ===== 하단 상세 정보(현재 상태/마지막 감지/횟수) 박스 스타일 ===== */
+        .info-box {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: left;
+            font-size: 14px;
+            color: #555;
+            line-height: 2;                      /* 줄 간격을 넓게 줘서 가독성 향상 */
+        }
+        .info-box span {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>&#128274; 침입자 감지 시스템</h1>
+        <!-- &#128274; 는 🔒(잠금 자물쇠) 이모지의 HTML 엔티티 코드
+             이모지를 직접 입력하면 라즈베리파이 터미널/일부 환경에서 인코딩이 깨질 수 있어
+             코드 형태로 안전하게 표시함 -->
+
+        {% if status.state == '감지됨' %}
+            <!-- Jinja2 템플릿 문법: Flask에서 전달한 status 딕셔너리의 state 값이
+                 '감지됨'이면 아래 블록을 렌더링하고, 아니면 else 블록을 렌더링함 -->
+            <div class="status-circle detected">&#128680;</div>
+            <!-- &#128680; = 🚨(경광등) 이모지. 감지 상태일 때만 표시되고 pulse 애니메이션 적용됨 -->
+            <div class="status-text detected">침입자 감지!</div>
+        {% else %}
+            <div class="status-circle normal">&#9989;</div>
+            <!-- &#9989; = ✅(체크 표시) 이모지. 정상 상태일 때 표시됨 -->
+            <div class="status-text normal">정상</div>
+        {% endif %}
+
+        <div class="info-box">
+            <!-- {{ }} 는 Jinja2 변수 출력 문법: Flask의 status 딕셔너리 값을 그대로 화면에 출력함 -->
+            현재 상태: <span>{{ status.state }}</span><br>
+            마지막 감지: <span>{{ status.last_detected }}</span><br>
+            총 감지 횟수: <span>{{ status.count }}회</span>
+        </div>
+    </div>
+</body>
+</html>
